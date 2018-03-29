@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import gpxpy.geo
 import geopandas as gpd
+from shapely.geometry import Point
 
 
 def load_ids():
@@ -56,7 +57,7 @@ def filter_by_status_change(ids):
                         dist = dist + curr_dist
                         span = ts - prev_ts
                         total_span = total_span + span.total_seconds()
-                        if status != prev_status or span.total_seconds() > 300:
+                        if status != prev_status or span.total_seconds() > 60*10:
                             output.write(prev_line.strip()+","+str(dist)+","+str(total_span)+"\n")
                             output.write(line.strip()+",0,0\n")
                             dist = 0
@@ -172,14 +173,63 @@ def aggregate_transaction():
                 prev_status, prev_dist, prev_span = status, dist, span
                 prev_line = line
 
+def add_subzone_mapping():
+    poly = gpd.read_file('/Users/zhouyou/Workspace/RA/code/lib/sub_zone/central_sub_zone.shp')
+    poly = poly.loc[:, ['PLN_AREA_N', 'geometry']]
+    poly = poly.to_crs(epsg=4326)
+    SUBZONES = [str(s) for s in list(set(poly["PLN_AREA_N"]))]
+
+    def get_subzone(x, y):
+        point = Point(tuple([float(x), float(y)]))
+        mapped = False
+        result = ""
+        for i, area in enumerate(poly['geometry']):
+            if point.within(area):
+                result = poly.loc[i, 'PLN_AREA_N']
+                mapped = True
+        if mapped:
+            return result
+        else:
+            return "Not Central"
+
+
+    for id in ids:
+        curr_dir = path.join(DIR, "driver_sample", id)
+        input_files = listdir(path.join(curr_dir, "filtered"))
+        subzone_dict = {}
+        for s in SUBZONES:
+            subzone_dict[s] = 0
+        subzone_dict['Not Central'] = 0
+
+        for f in input_files:
+            with open(path.join(curr_dir, "filtered", f)) as input:
+                line = input.readline().split(",")
+                lat, lon, prev_status = line[3:6]
+                if prev_status == 'POB':
+                    subzone = get_subzone(lat, lon)
+                    subzone_dict[subzone] = subzone_dict[subzone] + 1
+
+                for line in input.readlines():
+                    cells = line.split(",")
+                    lat, lon, status = cells[3:6]
+                    if status == 'POB' and prev_status != 'POB':
+                        subzone = get_subzone(lat, lon)
+                        subzone_dict[subzone] = subzone_dict[subzone] + 1
+                    prev_status = status
+        with open(path.join(curr_dir, "summary", "start_area_subzone.csv"), 'w') as output:
+            output.write("subzone, count\n")
+            for s in SUBZONES:
+                output.write("%s,%d\n"%(s, subzone_dict[s]))
+            output.write("%s,%d\n" % ('Not Central', subzone_dict['Not Central']))
+
+
 DIR = "/Volumes/WD/zhouyou/vehicle_location/dec_rda/"
 STATUS = ['STC', 'FREE', 'BREAK', 'ARRIVED', 'ONCALL', 'OFFLINE', 'POB', 'PAYMENT', 'NOSHOW', 'BUSY']
 ids = load_ids()
 
 
-# step 1: get temporal distribution
 # sort_by_time(ids)
 # filter_by_status_change(ids)
 # aggregate_temporal_distribution()
-aggregate_transaction()
-
+# aggregate_transaction()
+add_subzone_mapping()
