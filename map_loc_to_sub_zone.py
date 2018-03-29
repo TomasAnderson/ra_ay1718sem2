@@ -47,6 +47,5 @@ if __name__ == '__main__':
     poly = gpd.read_file('/Users/zhouyou/Workspace/RA/code/lib/sub_zone/central_sub_zone.shp')
     poly = poly.loc[:, ['SUBZONE_N', 'geometry']]
     poly = poly.to_crs(epsg=4326)
-    exit()
     main()
 
