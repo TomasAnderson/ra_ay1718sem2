@@ -81,7 +81,9 @@ def aggregate_temporal_distribution():
             for f in input_files:
                 curr_date = f[:8]
                 sec_list, payment_count, total_sec = get_temporal_distribution(path.join(curr_dir, "filtered", f))
-                line = [curr_date]+sec_list+ [payment_count, total_sec/3600.0]
+                min_list = ["%.2f" % (v/3600.0) for v in sec_list]
+
+                line = [curr_date]+min_list+ [payment_count, "%.2f"%(total_sec/3600.0)]
                 output.write(",".join([str(v) for v in line])+"\n")
 
 
@@ -130,6 +132,45 @@ def add_zone_mapping():
     poly = poly.to_crs(epsg=4326)
     print(poly)
 
+def aggregate_transaction():
+    for id in ids:
+        curr_dir = path.join(DIR, "driver_sample", id)
+        input_files = listdir(path.join(curr_dir, "filtered"))
+
+        summary_folder = path.join(curr_dir, "summary")
+        if not path.exists(summary_folder):
+            makedirs(summary_folder)
+
+
+        with open(path.join(curr_dir, "summary", "transanction.csv"), 'w') as output:
+            header = ",".join(["transanction index", "Total Time(min)", "Total Distance(km)"]) + "\n"
+            output.write(header)
+            filtered_lines = []
+            for f in input_files:
+                with open(path.join(curr_dir, "filtered", f)) as input:
+                    for line in input.readlines():
+                        cells = line.strip().split(",")
+                        status, dist, span = cells[5:]
+                        if (status == 'POB' or status == 'FREE') and span != '0':
+                            filtered_lines.append(line)
+
+
+            prev_status, prev_dist, prev_span = filtered_lines[0].split(",")[5:]
+            prev_line = filtered_lines[0]
+            trans_count = 1
+            for line in filtered_lines[1:]:
+                cells = line.strip().split(",")
+                status, dist, span = cells[5:]
+                if prev_status == 'FREE' and status == 'POB':
+                    # output.write(prev_line)
+                    # output.write(line)
+                    finding_time = float(prev_span.strip()) / 60.0
+                    finding_dist = float(prev_dist.strip()) /1000.0
+                    output_line = ",".join([str(trans_count), "%.2f"%finding_time, "%.2f"%finding_dist])+"\n"
+                    output.write(output_line)
+                    trans_count = trans_count + 1
+                prev_status, prev_dist, prev_span = status, dist, span
+                prev_line = line
 
 DIR = "/Volumes/WD/zhouyou/vehicle_location/dec_rda/"
 STATUS = ['STC', 'FREE', 'BREAK', 'ARRIVED', 'ONCALL', 'OFFLINE', 'POB', 'PAYMENT', 'NOSHOW', 'BUSY']
@@ -140,5 +181,5 @@ ids = load_ids()
 # sort_by_time(ids)
 # filter_by_status_change(ids)
 # aggregate_temporal_distribution()
+aggregate_transaction()
 
-# add_zone_mapping()
