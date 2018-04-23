@@ -174,10 +174,12 @@ def aggregate_transaction():
                 prev_line = line
 
 def add_subzone_mapping():
-    poly = gpd.read_file('/Users/zhouyou/Workspace/RA/code/lib/sub_zone/central_sub_zone.shp')
-    poly = poly.loc[:, ['PLN_AREA_N', 'geometry']]
+    poly = gpd.read_file('/Users/zhouyou/Workspace/RA/code/lib/all_SG/MP14_SUBZONE_WEB_PL.shp')
+    poly = poly.loc[:, ['SUBZONE_N', 'geometry']]
     poly = poly.to_crs(epsg=4326)
-    SUBZONES = [str(s) for s in list(set(poly["PLN_AREA_N"]))]
+    SUBZONES = [str(s) for s in list(set(poly["SUBZONE_N"]))]
+    print(len(SUBZONES))
+    exit()
 
     def get_subzone(x, y):
         point = Point(tuple([float(x), float(y)]))
@@ -225,7 +227,7 @@ def add_subzone_mapping():
 
 DIR = "/Volumes/WD/zhouyou/vehicle_location/dec_rda/"
 STATUS = ['STC', 'FREE', 'BREAK', 'ARRIVED', 'ONCALL', 'OFFLINE', 'POB', 'PAYMENT', 'NOSHOW', 'BUSY']
-ids = load_ids()
+# ids = load_ids()
 
 
 # sort_by_time(ids)

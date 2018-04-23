@@ -17,7 +17,7 @@ def add_subzone_col(filename):
             out_f.write(header+",SUBZONE_N\n")
 
             for row in f.readlines():
-                x, y = row.split(",")[2:4]
+                x, y = row.split(",")[3:5]
                 point = Point(tuple([float(x), float(y)]))
                 mapped = False
                 result = ""
@@ -42,8 +42,8 @@ def main():
 
 
 if __name__ == '__main__':
-    input_dir = "/Volumes/WD/zhouyou/vehicle_location/dec rda/free_veh/"
-    out_dir = "/Volumes/WD/zhouyou/vehicle_location/dec rda/free_veh_with_loc/"
+    input_dir = "/Volumes/WD/zhouyou/comfort_april/free_veh/"
+    out_dir = "/Volumes/WD/zhouyou/comfort_april/free_veh_with_loc/"
     poly = gpd.read_file('/Users/zhouyou/Workspace/RA/code/lib/sub_zone/central_sub_zone.shp')
     poly = poly.loc[:, ['SUBZONE_N', 'geometry']]
     poly = poly.to_crs(epsg=4326)
