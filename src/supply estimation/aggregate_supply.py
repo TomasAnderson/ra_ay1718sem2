@@ -57,14 +57,14 @@ def output_summary():
     output_header = "subzone,8:00-8:05 mean,8:00-8:05 std,8:05-8:10 mean,8:05-8:10 std,8:10-8:15 mean,8:10-8:15 std,8:15-8:20 mean,8:15-8:20 std,8:20-8:25 mean,8:20-8:25 std,8:25-8:30 mean,8:25-8:30 std"
     output_df.to_csv(out_dir+"summary.csv", header=output_header, index=False)
 def main():
-    # filenames = []
-    # for f in os.listdir(input_dir):
-    #     if ".csv" in f:
-    #         filenames.append(f)
-    # intervals = ["00", "05", "10", "15", "20", "25"]
-    # for interval in intervals:
-    #     files = filter(lambda x: interval in x.replace(".csv","").split("_")[4], filenames)
-    #     calculate_supply(files, interval)
+    filenames = []
+    for f in os.listdir(input_dir):
+        if ".csv" in f:
+            filenames.append(f)
+    intervals = ["00", "05", "10", "15", "20", "25"]
+    for interval in intervals:
+        files = filter(lambda x: interval in x.replace(".csv","").split("_")[4], filenames)
+        calculate_supply(files, interval)
 
     output_summary()
 
