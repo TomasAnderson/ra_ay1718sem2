@@ -1,10 +1,11 @@
 ## File hierachy
 
-- lib: shape files used to mapping from latitude/longtitude to planning area
-- notebook: jupyter notebook for data visualisation and illustration of driver pattern
-- src: source code for two tasks
+- `lib/`: shape files used to mapping from latitude/longtitude to planning area
+- `notebook`: jupyter notebook for data visualisation and illustration of driver pattern
+- `src`: source code for two tasks
   - driver pattern analysis
   - supply estimation
+- `document` some useful mappings such as postal2zone and weather
 
 ## Supply Estimation
 
@@ -25,4 +26,3 @@ The purpose of all scripts are listed here:
 * `sample_individual_driver.py` and `sample_multiple_driver.py` It reads all raw data files and aggregate one or multiple drivers. 
 * `sample_driver_over_time` calculate the driver's time distribution ovver different activities
 * `aggregate_info` calculate the driver's customer seeking meta information
-
